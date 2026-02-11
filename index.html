@@ -1,260 +1,536 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Actuation</title>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Actuation — Configurator</title>
 <link rel="icon" type="image/png" href="https://i.postimg.cc/dtDMsNrY/Actuatuion-Logo.png">
-
 <style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Helvetica, Arial, sans-serif;
-}
-
+/* ---------- Global / Reset ---------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html,body { height: 100%; }
 body {
-    background: #ffffff;
-    color: #000000;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: #fff; color: #000; line-height: 1.4;
+  -webkit-font-smoothing:antialiased;
+}
+.container { max-width: 1200px; margin: 32px auto; padding: 0 24px; }
+
+/* ---------- Header ---------- */
+.header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 18px 0; border-bottom:1px solid #000;
+}
+.brand { display:flex; align-items:center; gap:12px; }
+.brand img { height:40px; display:block; }
+.brand h1 { font-size:16px; font-weight:600; letter-spacing:1px; }
+
+/* ---------- Layout ---------- */
+.grid-section { margin-top:28px; border-bottom:1px solid #000; padding:28px 0; }
+.section-title { font-size:15px; font-weight:600; text-transform:none; margin-bottom:18px; }
+
+/* responsive grid of cards */
+.card-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+  gap:18px;
 }
 
-header {
-    padding: 20px 40px;
-    border-bottom: 1px solid #000;
-    display: flex;
-    align-items: center;
-}
-
-header img {
-    height: 40px;
-    margin-right: 15px;
-}
-
-h1 {
-    font-size: 20px;
-    font-weight: 500;
-    letter-spacing: 1px;
-}
-
-.section {
-    padding: 40px;
-    border-bottom: 1px solid #000;
-}
-
-.section h2 {
-    margin-bottom: 20px;
-    font-weight: 500;
-}
-
-.grid {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
+/* ---------- Card ---------- */
 .card {
-    width: 260px;
-    border: 1px solid #000;
-    cursor: pointer;
+  display:flex; flex-direction:column; cursor:pointer;
+  border:1px solid #000; user-select:none; outline:none;
+  background:#fff; transition: transform .12s linear, border-color .12s linear;
 }
+.card:focus { box-shadow:none; }
+.card:hover { transform: translateY(-3px); }
+.card.selected { border:3px solid #000; transform: translateY(-2px); }
 
-.card img {
-    width: 100%;
-    height: 160px;
-    object-fit: cover;
-    border-bottom: 1px solid #000;
-}
+/* image area */
+.card-media { width:100%; height:160px; border-bottom:1px solid #000; display:block; background:#f8f8f8; }
+.card-media img { width:100%; height:100%; object-fit:cover; display:block; }
 
-.card-content {
-    padding: 10px;
-}
+/* content */
+.card-body { padding:12px 12px 14px 12px; }
+.card-title { font-size:13px; font-weight:600; margin-bottom:8px; }
+.card-meta { font-size:13px; color:#000; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.card-price { font-size:13px; font-weight:600; }
 
-.card.selected {
-    border: 3px solid #000;
-}
-
-.price {
-    margin-top: 5px;
-    font-size: 14px;
-}
-
+/* ---------- Summary / Controls ---------- */
 .summary {
-    padding: 40px;
-    border-bottom: 1px solid #000;
+  margin-top:28px; padding:24px; border-top:1px solid #000; display:flex; gap:28px; align-items:flex-start; justify-content:space-between;
+  flex-wrap:wrap;
 }
+.summary-left { min-width:260px; max-width:640px; }
+.summary-right { min-width:260px; }
 
-.total {
-    font-size: 18px;
-    margin-top: 10px;
+/* preview list */
+.preview-list { display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; }
+.preview-item {
+  display:flex; gap:8px; align-items:center; padding:8px; border:1px solid #000;
+  background:#fff; font-size:13px;
 }
+.preview-thumb { width:48px; height:48px; display:block; object-fit:cover; border:1px solid #000; }
+.preview-text { max-width:220px; font-weight:600; font-size:13px; }
+.preview-price { font-weight:600; margin-left:8px; }
 
+/* total and buttons */
+.total-line { font-size:18px; font-weight:700; margin-bottom:8px; }
+.ctrls { display:flex; gap:12px; align-items:center; }
 button {
-    padding: 12px 20px;
-    border: 1px solid #000;
-    background: #fff;
-    cursor: pointer;
+  border:1px solid #000; background:#fff; padding:10px 16px; cursor:pointer; font-weight:600; font-size:13px;
 }
+button.primary {
+  background:#000; color:#fff;
+}
+button[disabled] { opacity:0.3; cursor:not-allowed; }
 
-button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}§
+/* cart modal (simple) */
+.modal-backdrop { position:fixed; inset:0; display:none; background:rgba(0,0,0,0.25); align-items:center; justify-content:center; z-index:1200; }
+.modal { width:720px; max-width:95%; border:1px solid #000; background:#fff; padding:18px; }
+.modal h3 { margin-bottom:12px; font-size:16px; }
+.modal .rows { display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
+.modal .row { display:flex; justify-content:space-between; font-size:14px; border-top:1px dashed #000; padding-top:8px; }
 
-.checkout {
-    padding: 40px;
+/* footer */
+footer { margin-top:36px; padding:18px 0; border-top:1px solid #000; text-align:center; font-size:13px; }
+
+/* accessibility focus */
+.card[tabindex]:focus { outline-offset:3px; outline:2px dashed #000; }
+.preview-item button { border:none; padding:6px; cursor:pointer; font-size:12px; background:#000; color:#fff; }
+
+@media (max-width:720px){
+  .card-grid { grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); }
+  .preview-text { max-width:120px; }
 }
 </style>
 </head>
-
 <body>
+  <div class="container" role="application" aria-labelledby="app-title">
+    <header class="header" role="banner">
+      <div class="brand">
+        <img src="https://i.postimg.cc/dtDMsNrY/Actuatuion-Logo.png" alt="Actuation logo">
+        <h1 id="app-title">ACTUATION</h1>
+      </div>
+      <div aria-hidden="true">CART (placeholder)</div>
+    </header>
 
-<header>
-    <img src="https://i.postimg.cc/dtDMsNrY/Actuatuion-Logo.png">
-    <h1>ACTUATION</h1>
-</header>
+    <!-- ---------- Step 1: Barebones ---------- -->
+    <section class="grid-section" aria-labelledby="s1-title">
+      <div class="section-title" id="s1-title">Step 1 — Barebones Kit</div>
+      <div class="card-grid" role="list" aria-label="Barebones options">
+        <article class="card" role="listitem" tabindex="0"
+                 data-group="barebone" data-price="100"
+                 data-name="Ducky One ProjectD Tinker65 Barebone Mechanical Keyboard"
+                 data-img="https://microless.com/cdn/products/5cf9760a0e715c4fae720688c74798d0-md.jpg">
+          <div class="card-media"><img src="https://microless.com/cdn/products/5cf9760a0e715c4fae720688c74798d0-md.jpg" alt=""></div>
+          <div class="card-body">
+            <div class="card-title">Ducky One ProjectD Tinker65 Barebone Mechanical Keyboard</div>
+            <div class="card-meta"><span class="card-price">(+€100)</span></div>
+          </div>
+        </article>
 
-<!-- STEP 1 -->
-<div class="section" id="step1">
-<h2>Step 1 — Barebones Kit</h2>
-<div class="grid">
+        <article class="card" role="listitem" tabindex="0"
+                 data-group="barebone" data-price="130"
+                 data-name="GeekZB - SCC100 Mechanical Keyboard Barebone"
+                 data-img="https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQGZ5ft7ZgtUKGit0KvCbG3uyxarqlAyy3Bty2ZKsoxj02Vds9ih6CLsQap9n5MyiqoQaKJYc5ONaMGfLZc32CXRVs5RvAbZFFArAy9YLycb7o8igi-hD6_">
+          <div class="card-media"><img src="https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQGZ5ft7ZgtUKGit0KvCbG3uyxarqlAyy3Bty2ZKsoxj02Vds9ih6CLsQap9n5MyiqoQaKJYc5ONaMGfLZc32CXRVs5RvAbZFFArAy9YLycb7o8igi-hD6_" alt=""></div>
+          <div class="card-body">
+            <div class="card-title">GeekZB - SCC100 Mechanical Keyboard Barebone</div>
+            <div class="card-meta"><span class="card-price">(+€130)</span></div>
+          </div>
+        </article>
 
-<div class="card" data-price="100" data-group="barebone">
-<img src="https://microless.com/cdn/products/5cf9760a0e715c4fae720688c74798d0-md.jpg">
-<div class="card-content">
-<div>Ducky One ProjectD Tinker65 Barebone Mechanical Keyboard</div>
-<div class="price">(+€100)</div>
-</div>
-</div>
+        <article class="card" role="listitem" tabindex="0"
+                 data-group="barebone" data-price="70"
+                 data-name="GamaKay LK67 65% Mechanical Keyboard Case-Barebone Version"
+                 data-img="https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcS0lDY66WAVEiEErMigqEraqQs7A_7JR7KZpZwCJwRwbM2hzKPYo41QIE60way8GHCIitxdMtF759-hWCm7vQGO7D0hPRsHAOJu9bUnSIo1m6Exuy1gGkCC8-s">
+          <div class="card-media"><img src="https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcS0lDY66WAVEiEErMigqEraqQs7A_7JR7KZpZwCJwRwbM2hzKPYo41QIE60way8GHCIitxdMtF759-hWCm7vQGO7D0hPRsHAOJu9bUnSIo1m6Exuy1gGkCC8-s" alt=""></div>
+          <div class="card-body">
+            <div class="card-title">GamaKay LK67 65% Mechanical Keyboard Case - Barebone</div>
+            <div class="card-meta"><span class="card-price">(+€70)</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
 
-<div class="card" data-price="130" data-group="barebone">
-<img src="https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQGZ5ft7ZgtUKGit0KvCbG3uyxarqlAyy3Bty2ZKsoxj02Vds9ih6CLsQap9n5MyiqoQaKJYc5ONaMGfLZc32CXRVs5RvAbZFFArAy9YLycb7o8igi-hD6_">
-<div class="card-content">
-<div>GeekZB - SCC100 Mechanical Keyboard Barebone</div>
-<div class="price">(+€130)</div>
-</div>
-</div>
+    <!-- ---------- Step 2: Switches ---------- -->
+    <section class="grid-section" aria-labelledby="s2-title">
+      <div class="section-title" id="s2-title">Step 2 — Switches</div>
+      <div class="card-grid" role="list" aria-label="Switch options">
+        <article class="card" role="listitem" tabindex="0"
+                 data-group="switch" data-price="15"
+                 data-name="Transparent 5-Pin Linear Switches"
+                 data-img="https://m.media-amazon.com/images/I/61OYMYh+QmL._AC_UL320_.jpg">
+          <div class="card-media"><img src="https://m.media-amazon.com/images/I/61OYMYh+QmL._AC_UL320_.jpg" alt=""></div>
+          <div class="card-body">
+            <div class="card-title">Transparent 5-Pin Linear Switches</div>
+            <div class="card-meta"><span class="card-price">(+€15)</span></div>
+          </div>
+        </article>
 
-<div class="card" data-price="70" data-group="barebone">
-<img src="https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcS0lDY66WAVEiEErMigqEraqQs7A_7JR7KZpZwCJwRwbM2hzKPYo41QIE60way8GHCIitxdMtF759-hWCm7vQGO7D0hPRsHAOJu9bUnSIo1m6Exuy1gGkCC8-s">
-<div class="card-content">
-<div>GamaKay LK67 65% Mechanical Keyboard Case-Barebone Version</div>
-<div class="price">(+€70)</div>
-</div>
-</div>
+        <article class="card" role="listitem" tabindex="0"
+                 data-group="switch" data-price="25"
+                 data-name="Cherry MX RGB Silent Red"
+                 data-img="https://m.media-amazon.com/images/I/61XUouIHy8L._AC_UL320_.jpg">
+          <div class="card-media"><img src="https://m.media-amazon.com/images/I/61XUouIHy8L._AC_UL320_.jpg" alt=""></div>
+          <div class="card-body">
+            <div class="card-title">Cherry MX RGB Silent Red</div>
+            <div class="card-meta"><span class="card-price">(+€25)</span></div>
+          </div>
+        </article>
 
-</div>
-</div>
+        <article class="card" role="listitem" tabindex="0"
+                 data-group="switch" data-price="40"
+                 data-name="Transparent Tactile Switch"
+                 data-img="https://m.media-amazon.com/images/I/81y-F2B+iWL._AC_UL320_.jpg">
+          <div class="card-media"><img src="https://m.media-amazon.com/images/I/81y-F2B+iWL._AC_UL320_.jpg" alt=""></div>
+          <div class="card-body">
+            <div class="card-title">Transparent Tactile Switch</div>
+            <div class="card-meta"><span class="card-price">(+€40)</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
 
-<!-- STEP 2 -->
-<div class="section">
-<h2>Step 2 — Switches</h2>
-<div class="grid">
+    <!-- ---------- Step 3: Keycaps ---------- -->
+    <section class="grid-section" aria-labelledby="s3-title">
+      <div class="section-title" id="s3-title">Step 3 — Keycaps</div>
+      <div class="card-grid" role="list" aria-label="Keycap options">
+        <article class="card" role="listitem" tabindex="0"
+                 data-group="keycap" data-price="40"
+                 data-name="PBT Keycaps 137 Keys XDA Honey Milk"
+                 data-img="https://m.media-amazon.com/images/I/61077iGZScL._AC_UL320_.jpg">
+          <div class="card-media"><img src="https://m.media-amazon.com/images/I/61077iGZScL._AC_UL320_.jpg" alt=""></div>
+          <div class="card-body">
+            <div class="card-title">PBT Keycaps 137 Keys XDA Honey Milk</div>
+            <div class="card-meta"><span class="card-price">(+€40)</span></div>
+          </div>
+        </article>
 
-<div class="card" data-price="15" data-group="switch">
-<img src="https://m.media-amazon.com/images/I/61OYMYh+QmL._AC_UL320_.jpg">
-<div class="card-content">
-<div>Transparent 5-Pin Linear Switches</div>
-<div class="price">(+€15)</div>
-</div>
-</div>
+        <article class="card" role="listitem" tabindex="0"
+                 data-group="keycap" data-price="30"
+                 data-name="XVX WOB 168-Key PBT Set"
+                 data-img="https://m.media-amazon.com/images/I/71RGDmRxi8L._AC_UL320_.jpg">
+          <div class="card-media"><img src="https://m.media-amazon.com/images/I/71RGDmRxi8L._AC_UL320_.jpg" alt=""></div>
+          <div class="card-body">
+            <div class="card-title">XVX WOB 168-Key PBT Set</div>
+            <div class="card-meta"><span class="card-price">(+€30)</span></div>
+          </div>
+        </article>
 
-<div class="card" data-price="25" data-group="switch">
-<img src="https://m.media-amazon.com/images/I/61XUouIHy8L._AC_UL320_.jpg">
-<div class="card-content">
-<div>Cherry MX RGB Silent Red</div>
-<div class="price">(+€25)</div>
-</div>
-</div>
+        <article class="card" role="listitem" tabindex="0"
+                 data-group="keycap" data-price="40"
+                 data-name="Sunzit Manga Theme PBT Set"
+                 data-img="https://m.media-amazon.com/images/I/8193fNPXFEL._AC_UL320_.jpg">
+          <div class="card-media"><img src="https://m.media-amazon.com/images/I/8193fNPXFEL._AC_UL320_.jpg" alt=""></div>
+          <div class="card-body">
+            <div class="card-title">Sunzit Manga Theme PBT Set</div>
+            <div class="card-meta"><span class="card-price">(+€40)</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
 
-<div class="card" data-price="40" data-group="switch">
-<img src="https://m.media-amazon.com/images/I/81y-F2B+iWL._AC_UL320_.jpg">
-<div class="card-content">
-<div>Transparent Tactile Switch</div>
-<div class="price">(+€40)</div>
-</div>
-</div>
+    <!-- ---------- Step 4: Assembly ---------- -->
+    <section class="grid-section" aria-labelledby="s4-title">
+      <div class="section-title" id="s4-title">Step 4 — Assembly</div>
+      <div class="card-grid" role="list" aria-label="Assembly options">
+        <!-- assembly items intentionally have no product image -->
+        <article class="card" role="listitem" tabindex="0"
+                 data-group="assembly" data-price="30"
+                 data-name="Pre-Assembled (+€30)">
+          <div class="card-media" aria-hidden="true">
+            <!-- minimal SVG placeholder for thumbnail -->
+            <svg width="100%" height="160" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="display:block">
+              <rect width="100%" height="100%" fill="#fff" stroke="#000" stroke-width="0"></rect>
+              <g transform="translate(4,4)" fill="none" stroke="#000" stroke-width="1.2">
+                <rect x="0" y="0" width="16" height="10"></rect>
+                <rect x="1" y="11" width="8" height="6"></rect>
+              </g>
+            </svg>
+          </div>
+          <div class="card-body">
+            <div class="card-title">Pre-Assembled</div>
+            <div class="card-meta"><span class="card-price">(+€30)</span></div>
+          </div>
+        </article>
 
-</div>
-</div>
+        <article class="card" role="listitem" tabindex="0"
+                 data-group="assembly" data-price="0"
+                 data-name="Assemble Yourself (No Fee)">
+          <div class="card-media" aria-hidden="true">
+            <svg width="100%" height="160" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="display:block">
+              <rect width="100%" height="100%" fill="#fff" stroke="#000" stroke-width="0"></rect>
+              <g transform="translate(4,4)" fill="none" stroke="#000" stroke-width="1.2">
+                <rect x="0" y="0" width="16" height="10"></rect>
+                <line x1="0" y1="12" x2="16" y2="12"></line>
+              </g>
+            </svg>
+          </div>
+          <div class="card-body">
+            <div class="card-title">Assemble Yourself</div>
+            <div class="card-meta"><span class="card-price">(+€0)</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
 
-<!-- STEP 3 -->
-<div class="section">
-<h2>Step 3 — Keycaps</h2>
-<div class="grid">
+    <!-- ---------- Summary ---------- -->
+    <section class="summary" aria-labelledby="summary-title">
+      <div class="summary-left">
+        <div id="summary-title" class="section-title">Configuration Summary</div>
+        <div class="preview-list" aria-live="polite" id="previewList"></div>
+      </div>
 
-<div class="card" data-price="40" data-group="keycap">
-<img src="https://m.media-amazon.com/images/I/61077iGZScL._AC_UL320_.jpg">
-<div class="card-content">
-<div>PBT Keycaps 137 Keys XDA Profile DYE-SUB Personalized White Yellow Honey Milk Japanese Keycap Suitable for Mechanical Gaming Keyboard (Japanese)</div>
-<div class="price">(+€40)</div>
-</div>
-</div>
+      <div class="summary-right">
+        <div class="total-line" id="totalLine">Total: €0</div>
+        <div class="ctrls">
+          <button id="resetBtn">Reset</button>
+          <button id="addCartBtn" class="primary" disabled>Add to Cart</button>
+        </div>
+      </div>
+    </section>
 
-<div class="card" data-price="30" data-group="keycap">
-<img src="https://m.media-amazon.com/images/I/71RGDmRxi8L._AC_UL320_.jpg">
-<div class="card-content">
-<div>XVX WOB 168-Key PBT Set</div>
-<div class="price">(+€30)</div>
-</div>
-</div>
+    <!-- ---------- Cart Modal (placeholder) ---------- -->
+    <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal" role="document" aria-labelledby="modalTitle">
+        <h3 id="modalTitle">Cart Review (placeholder)</h3>
+        <div class="rows" id="modalRows"></div>
+        <div style="display:flex;gap:12px;justify-content:flex-end;">
+          <button id="closeModalBtn">Close</button>
+          <button id="checkoutBtn" class="primary" disabled>Checkout (API required)</button>
+        </div>
+      </div>
+    </div>
 
-<div class="card" data-price="40" data-group="keycap">
-<img src="https://m.media-amazon.com/images/I/8193fNPXFEL._AC_UL320_.jpg">
-<div class="card-content">
-<div>Sunzit Manga Theme PBT Set</div>
-<div class="price">(+€40)</div>
-</div>
-</div>
+    <footer>
+      ©2026 Actuation by ACE.
+    </footer>
+  </div>
 
-</div>
-</div>
+<script>
+/*
+  Advanced single-file configurator JS
+  - One selection per group
+  - Keyboard navigation (Tab focus, Arrow keys, Enter/Space select)
+  - localStorage persistence
+  - Summary + remove from summary
+  - Modal cart preview (non-functional)
+*/
+(() => {
+  const GROUPS = ["barebone","switch","keycap","assembly"];
+  const storageKey = "actuation.selections.v1";
+  const allCards = Array.from(document.querySelectorAll(".card"));
+  const previewList = document.getElementById("previewList");
+  const totalLine = document.getElementById("totalLine");
+  const addCartBtn = document.getElementById("addCartBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const modalBackdrop = document.getElementById("modalBackdrop");
+  const modalRows = document.getElementById("modalRows");
+  const closeModalBtn = document.getElementById("closeModalBtn");
+  const checkoutBtn = document.getElementById("checkoutBtn");
 
-<!-- STEP 4 -->
-<div class="section">
-<h2>Step 4 — Assembly</h2>
-<div class="grid">
+  // Load or init selections
+  let selections = loadSelections();
 
-<div class="card" data-price="30" data-group="assembly">
-<div class="card-content">
-<div>Pre-Assembled</div>
-<div class="price">(+€30)</div>
-</div>
-</div>
+  // Utilities
+  function parsePrice(v){ return Number.parseInt(v,10) || 0; }
+  function saveSelections(){ localStorage.setItem(storageKey, JSON.stringify(selections)); }
+  function loadSelections(){
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if(!raw) return {};
+      return JSON.parse(raw) || {};
+    } catch(e) { return {}; }
+  }
 
-<div class="card" data-price="0" data-group="assembly">
-<div class="card-content">
-<div>Assemble Yourself</div>
-<div class="price">(+€0)</div>
-</div>
-</div>
+  // Initialize cards: apply previous selection state and wire events
+  allCards.forEach((card, idx) => {
+    const group = card.dataset.group;
+    const price = parsePrice(card.dataset.price);
+    const name = card.dataset.name || "";
+    const img = (card.querySelector("img") && card.querySelector("img").src) || null;
 
-</div>
-</div>
+    // Restore selection highlight if stored
+    if(selections[group] && selections[group].name === name) {
+      card.classList.add("selected");
+    }
 
-<!-- SUMMARY -->
-<div class="summary">
-<h2>Configuration Summary</h2>
-<div class="total">Total: €0</div>
-<br>
-<button id="addToCart">Add to Cart</button>
-</div>
+    // make card keyboard-operable: Enter/Space selects; arrow keys move focus
+    card.addEventListener("keydown", e => {
+      if(e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        selectCard(card);
+        return;
+      }
+      if(["ArrowRight","ArrowLeft","ArrowDown","ArrowUp"].includes(e.key)) {
+        e.preventDefault();
+        moveFocus(card, e.key);
+      }
+    });
 
-<!-- CART -->
-<div class="checkout">
-<h2>Cart</h2>
-<br>
-<button disabled>Google Pay</button>
-<button disabled>Apple Pay</button>
-</div>
+    // click
+    card.addEventListener("click", () => selectCard(card));
+  });
 
+  // Select card logic
+  function selectCard(card) {
+    const group = card.dataset.group;
+    const name = card.dataset.name || "";
+    const price = parsePrice(card.dataset.price);
+    const img = (card.querySelector("img") && card.querySelector("img").src) || null;
 
-  <footer>
-      
-   ©2026 Actuation by ACE.
-   
-</footer>
-  
+    // deselect same-group cards
+    document.querySelectorAll(`.card[data-group="${group}"]`).forEach(c => c.classList.remove("selected"));
+    card.classList.add("selected");
+
+    // set selection object
+    selections[group] = { name, price, img };
+    saveSelections();
+    renderSummary();
+  }
+
+  // render preview list + total + enable/disable buttons
+  function renderSummary() {
+    previewList.innerHTML = "";
+    let total = 0;
+    GROUPS.forEach(g => {
+      const s = selections[g];
+      if(!s) return;
+      total += parsePrice(s.price);
+      const item = document.createElement("div");
+      item.className = "preview-item";
+      const thumb = document.createElement("img");
+      thumb.className = "preview-thumb";
+      // if no image (assembly), use a minimal inline svg data URL placeholder
+      if(s.img) thumb.src = s.img;
+      else {
+        // 1x1 SVG placeholder with a simple box glyph
+        const svg = encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="48" height="48" fill="white" stroke="black" stroke-width="1"/><rect x="6" y="8" width="36" height="20" fill="none" stroke="black" stroke-width="1"/><line x1="6" y1="32" x2="42" y2="32" stroke="black" stroke-width="1"/></svg>');
+        thumb.src = "data:image/svg+xml;charset=utf8," + svg;
+      }
+      thumb.alt = s.name;
+      const meta = document.createElement("div");
+      meta.style.display = "flex"; meta.style.gap = "8px"; meta.style.alignItems = "center";
+      const text = document.createElement("div");
+      text.className = "preview-text";
+      text.textContent = s.name;
+      text.title = s.name;
+      const price = document.createElement("div");
+      price.className = "preview-price";
+      price.textContent = "€" + s.price;
+      const removeBtn = document.createElement("button");
+      removeBtn.textContent = "X";
+      removeBtn.title = "Remove";
+      removeBtn.style.marginLeft = "8px";
+      removeBtn.addEventListener("click", () => {
+        // remove selection and UI
+        delete selections[g];
+        // remove selected class on the card
+        document.querySelectorAll(`.card[data-group="${g}"]`).forEach(c => c.classList.remove("selected"));
+        saveSelections();
+        renderSummary();
+      });
+
+      meta.appendChild(text);
+      meta.appendChild(price);
+      item.appendChild(thumb);
+      item.appendChild(meta);
+      item.appendChild(removeBtn);
+      previewList.appendChild(item);
+    });
+
+    totalLine.textContent = "Total: €" + total;
+    const allSelected = GROUPS.every(g => !!selections[g]);
+    addCartBtn.disabled = !allSelected;
+    checkoutBtn.disabled = !allSelected;
+    if(allSelected) addCartBtn.textContent = `Add to Cart (€${total})`;
+    else addCartBtn.textContent = "Add to Cart";
+  }
+
+  // keyboard focus movement across cards (simple grid-aware)
+  function moveFocus(currentCard, key) {
+    const visibleCards = Array.from(document.querySelectorAll(".card"));
+    const idx = visibleCards.indexOf(currentCard);
+    if(idx === -1) return;
+    // naive grid movement: right = +1, left = -1, down = +cols, up = -cols
+    // compute columns by measuring first row layout
+    const grid = currentCard.closest(".card-grid");
+    if(!grid) return;
+    const cardWidth = currentCard.getBoundingClientRect().width;
+    const gap = parseFloat(getComputedStyle(grid).gap) || 18;
+    const gridWidth = grid.getBoundingClientRect().width;
+    const cols = Math.max(1, Math.floor((gridWidth + gap) / (cardWidth + gap)));
+    let newIndex = idx;
+    if(key === "ArrowRight") newIndex = Math.min(visibleCards.length - 1, idx + 1);
+    if(key === "ArrowLeft") newIndex = Math.max(0, idx - 1);
+    if(key === "ArrowDown") newIndex = Math.min(visibleCards.length - 1, idx + cols);
+    if(key === "ArrowUp") newIndex = Math.max(0, idx - cols);
+    visibleCards[newIndex].focus();
+  }
+
+  // reset
+  resetBtn.addEventListener("click", () => {
+    selections = {};
+    saveSelections();
+    document.querySelectorAll(".card").forEach(c => c.classList.remove("selected"));
+    renderSummary();
+  });
+
+  // Add to cart -> open modal (placeholder)
+  addCartBtn.addEventListener("click", () => {
+    // render modal rows
+    modalRows.innerHTML = "";
+    let subtotal = 0;
+    GROUPS.forEach(g => {
+      const s = selections[g];
+      if(!s) return;
+      const row = document.createElement("div");
+      row.className = "row";
+      const left = document.createElement("div");
+      left.textContent = s.name;
+      const right = document.createElement("div");
+      right.textContent = "€" + s.price;
+      row.appendChild(left);
+      row.appendChild(right);
+      modalRows.appendChild(row);
+      subtotal += parsePrice(s.price);
+    });
+    const totalRow = document.createElement("div");
+    totalRow.className = "row";
+    totalRow.style.fontWeight = "700";
+    totalRow.innerHTML = `<div>TOTAL</div><div>€${subtotal}</div>`;
+    modalRows.appendChild(totalRow);
+
+    modalBackdrop.style.display = "flex";
+    modalBackdrop.setAttribute("aria-hidden","false");
+    // checkoutBtn remains disabled (requires API integration)
+    checkoutBtn.disabled = true;
+  });
+
+  closeModalBtn.addEventListener("click", () => {
+    modalBackdrop.style.display = "none";
+    modalBackdrop.setAttribute("aria-hidden","true");
+  });
+
+  // close modal when clicking backdrop
+  modalBackdrop.addEventListener("click", e => {
+    if(e.target === modalBackdrop) {
+      modalBackdrop.style.display = "none";
+      modalBackdrop.setAttribute("aria-hidden","true");
+    }
+  });
+
+  // initial render
+  renderSummary();
+
+  // expose for debugging (optional)
+  window.actuation = {
+    selections,
+    reset: () => { resetBtn.click(); }
+  };
+})();
+</script>
 </body>
 </html>
